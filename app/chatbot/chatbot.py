@@ -45,8 +45,4 @@ class ChatBot:
         # 结束后把AI回答追加到历史
         with self.lock:
             history.append({"role": "assistant", "content": assistant_response})
-<<<<<<< HEAD
             self.histories[user_id] = history
-=======
-            self.histories[user_id] = history
->>>>>>> fadfb70423e4a67396324ea812c7e161ca38982c
