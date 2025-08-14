@@ -3,6 +3,8 @@ import os
 from models.chat_models import ChatRequest
 from entension.my_openai import MyOpenAI as OpenAI
 from fastapi.responses import StreamingResponse
+from fastapi import Request
+from chatbot.chatbot import ChatBot
 router = APIRouter()
 
 SERVER_IP = os.environ.get("SERVER_IP", "")
@@ -29,22 +31,34 @@ async def chat_endpoint(request: ChatRequest):
     content = response.choices[0].message.content
     return {"reply": content}
 
-@router.post("/chat/stream")
-async def chat_stream_endpoint(request: ChatRequest):
-    def event_generator():
-        stream = client.chat.completions.create(
-            model=request.model,
-            messages=[
-                {"role": "system", "content": "你是一个聪明且富有创造力的小说作家"},
-                {"role": "user", "content": request.message}
-            ],
-            top_p=0.7,
-            temperature=0.9,
-            stream=True
-        )
-        for chunk in stream:
-            content = chunk.choices[0].delta.content
-            if content is not None:
-                yield content
+def event_generator(model: str, message: str):
+    stream = client.chat.completions.create(
+        model=model,
+        messages=[
+            {"role": "system", "content": "你是一个聪明且富有创造力的小说作家"},
+            {"role": "user", "content": message}
+        ],
+        top_p=0.7,
+        temperature=0.9,
+        stream=True
+    )
+    for chunk in stream:
+        content = chunk.choices[0].delta.content
+        if content is not None:
+            yield content
 
-    return StreamingResponse(event_generator(), media_type="text/plain; charset=utf-8")
+chatbot = ChatBot(client=client, system_prompt="你是一个聪明且富有创造力的小说作家")
+@router.post("/chat/stream")
+async def chat_stream_endpoint(request: Request, chat_request: ChatRequest):
+    user_ip = request.client.host  # 获取客户端IP，做用户唯一标识
+    
+    # 调用 ChatBot 的 chat_stream 生成器，传入用户 IP 和请求参数
+    generator = chatbot.chat_stream(
+        user_id=user_ip,
+        user_message=chat_request.message,
+        model=chat_request.model,
+        temperature=0.9,
+        top_p=0.7
+    )
+    
+    return StreamingResponse(generator, media_type="text/plain; charset=utf-8")
