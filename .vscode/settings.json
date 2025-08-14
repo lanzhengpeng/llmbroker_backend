@@ -2,5 +2,20 @@
   "files.exclude": {
     "**/__init__.py": true,
     "**/__pycache__": true
+  },
+  "files.associations": {
+    "*.dbclient-js": "javascript",
+    "array": "cpp",
+    "initializer_list": "cpp",
+    "list": "cpp",
+    "ranges": "cpp",
+    "span": "cpp",
+    "utility": "cpp",
+    "valarray": "cpp",
+    "vector": "cpp",
+    "xhash": "cpp",
+    "xstring": "cpp",
+    "xtree": "cpp",
+    "xutility": "cpp"
   }
 }
