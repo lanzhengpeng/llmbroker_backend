@@ -132,3 +132,36 @@ def get_tool_details(tool_name: str) -> Dict[str, Any]:
     finally:
         cursor.close()
         conn.close()
+
+import sqlite3
+
+def delete_tool_by_name(tool_name: str) -> bool:
+    """
+    根据工具名称从数据库删除工具
+
+    参数：
+        tool_name: str，工具名称
+
+    返回：
+        bool: True 表示删除成功，False 表示工具不存在
+    """
+    # 当前脚本所在目录
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    db_path = os.path.join(base_dir, "../../../config/mcpTools.db")
+    
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    
+    try:
+        cursor.execute("SELECT COUNT(*) FROM tools WHERE name=?", (tool_name,))
+        count = cursor.fetchone()[0]
+        if count == 0:
+            return False  # 工具不存在
+        
+        cursor.execute("DELETE FROM tools WHERE name=?", (tool_name,))
+        conn.commit()
+        return True
+    finally:
+        cursor.close()
+        conn.close()
+

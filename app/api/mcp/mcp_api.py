@@ -3,6 +3,7 @@ from pydantic import BaseModel
 from typing import Dict, Optional, Any
 from api.mcp.mcp_tools.register_tool import parse_curl_and_register # , tools
 from api.mcp.mcp_tools.tools import load_tool_from_db,save_tool_to_db,get_tools_dict
+from api.mcp.mcp_tools.tools import delete_tool_by_name  # 导入你写的删除函数
 router = APIRouter()
 
 from typing import Optional, Dict, Any
@@ -50,14 +51,15 @@ def register_tool_route(payload: ToolRegister):
     return {"message": msg}
 
 
-# # 调用工具
-# @router.post("/tools/call/{tool_name}")
-# def call_tool_route(tool_name: str, payload: ToolCall = Body(...)):
-#     if tool_name not in tools:
-#         raise HTTPException(status_code=404, detail=f"Tool '{tool_name}' not found")
-#     tool_func = tools[tool_name]["func"]
-#     try:
-#         result = tool_func(params=payload.params, token=payload.token)
-#         return {"result": result}
-#     except Exception as e:
-#         raise HTTPException(status_code=500, detail=str(e))
+# 删除工具
+@router.delete("/tools/{tool_name}")
+def delete_tool_route(tool_name: str):
+    """
+    根据工具名称删除工具
+    """
+    
+
+    success = delete_tool_by_name(tool_name)
+    if not success:
+        raise HTTPException(status_code=404, detail=f"工具 '{tool_name}' 不存在")
+    return {"message": f"工具 '{tool_name}' 已删除"}
