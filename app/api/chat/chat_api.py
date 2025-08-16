@@ -114,7 +114,8 @@ async def chat_mcp_stream_generator(chat_request: ChatRequest):
         global tools
         tool_result = tools[tool_name]["func"](params=obj)  
         # 调用注册工具的函数，传入生成的参数，得到工具返回结果
-        tools={}
+        # 用完之后删除当前工具
+        del tools[tool_name]
         async def generator():  # 生成器函数，用于流式返回
             final_answer = FINAL_ANSWER.format(question=chat_request.message, tool_result=tool_result)  
             # 用模板生成最终回答，把工具返回结果嵌入回答
